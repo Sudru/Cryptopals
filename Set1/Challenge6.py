@@ -33,14 +33,11 @@ def hamming_distance(bytes1, bytes2):
     return sum(bin(a ^ b).count('1') for a, b in zip(bytes1, bytes2))
 
 
-def get_binary_list(str1):
-    binary_list = [format(ord(a), '08b') for a in str1]
-    return binary_list
-
 def test_hamming_distance():
     s1 = b"this is a test"
     s2 = b"wokka wokka!!!"
     print(hamming_distance(s1,s2))
+
 
 def determine_likey_key_length(cipher_text):
     min_hamming_distance = float('inf')
@@ -63,6 +60,7 @@ def determine_likey_key_length(cipher_text):
             key_length = keysize
     print(f"Key: {key_length} ==> Distance: {min_hamming_distance}")
     return key_length
+
 def main():
     with open("challenge6.txt", "r") as f:
         encrypted_content = base64.b64decode(f.read())
@@ -76,6 +74,7 @@ def main():
         print("Decryption Key-> "+decryption_key)
 
         print(repeating_key_xor(encrypted_content,decryption_key.encode()).decode())
+       
             
 if __name__=="__main__":
     main()

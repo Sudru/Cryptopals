@@ -2,6 +2,10 @@ from Crypto.Cipher import AES
 import random
 import string
 
+"""
+Determines whether a given cipher text is ecb or cbc based on matching block 
+In ECB two blocks with identical text product identical cipher text
+"""
 def detect_ecb(line):
     blocks = [line[i:i+16] for i in range(0,len(line),16)]
     repeating_block = {}

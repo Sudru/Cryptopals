@@ -23,13 +23,13 @@ def byte_at_a_time():
     block_size = AES.block_size
     secret_text = b''
     input_block = b'A'*15
-    #create a map of encrypted block of 14 A and one byte for checking the actual encrypted byte.
+    #create a map of encrypted block of 15 A and one byte for checking the actual encrypted byte.
     mapper_dictionary = {}
     for byte in string.printable:
         crafted_input = pad(input_block + byte.encode(), block_size)
         encrypted_text = cipher.encrypt(crafted_input)[:block_size]
         mapper_dictionary[encrypted_text] = byte
-    #for each character in the unknown string append with the 14 A and the character
+    #for each character in the unknown string append with the 15 A and the character
     # and compare with the mapper dictionary
     for i in range(len(decoded)):
         crafted = pad(input_block+bytes([decoded[i]]), block_size)

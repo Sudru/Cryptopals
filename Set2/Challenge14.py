@@ -46,41 +46,29 @@ def find_suffix_length(oracle,key,prefix_length):
 
 
 
-def break_ecb_with_prefix(oracle, key, block_size, prefix_length, suffix_length):
-    total_length = len(oracle(b'', key))
+def decrypt_hidden_suffix(pre_len, suffix_length, oracle,key):
+    n, suffix = 0, b''
+    while len(suffix) < suffix_length:
+        suffix = decrypt_block(n, suffix, pre_len, suffix_length, oracle,key)
+        n += 1
+    return suffix
 
-    unknown_length = total_length - prefix_length - suffix_length
 
-    target_start_block = (prefix_length + block_size - 1) // block_size
-    decrypted_data = b''
+def decrypt_block(n, suffix, pre_len, length, oracle,key):
+    for i in range(16):
+        if len(suffix) == length:
+            return suffix
 
-    # Iterate over the blocks containing the target bytes
-    for block_index in range(target_start_block, total_length//16):
-        # Initialize the current block
-        current_block = b''
+        inp = b'A' * (16 - pre_len%16) + b'A' * (15 - i)
 
-        # Iterate over the bytes within the block
-        for byte_index in range(block_size):
-            # Craft the input data to target the current byte within the block
-            input_data = b'A' * (block_size - byte_index - 1 + prefix_length % block_size)
-            target_block = oracle(input_data, key)[block_index * block_size: (block_index + 1) * block_size]
-
-            # Try all possible bytes to find the correct byte for the current position
-            for i in range(256):
-                test_input_data = input_data + current_block + bytes([i])
-                test_block = oracle(test_input_data, key)[block_index * block_size: (block_index + 1) * block_size]
-                if test_block == target_block:
-                    # Found the correct byte, add it to the current block
-                    current_block += bytes([i])
-                    break
-
-        # Append the decrypted bytes of the current block to the final decrypted data
-        decrypted_data += current_block
-
-    # Remove padding
-    # decrypted_data = unpad(decrypted_data)
-
-    return decrypted_data
+        # Build dictionary and find next byte in the suffix.
+        inp_len = pre_len + len(inp + suffix) + 1
+        inputs = {
+            oracle(inp + suffix + bytes([j]),key)[:inp_len]:(inp + suffix + bytes([j]))
+            for j in range(256)
+        }
+        suffix += bytes([inputs[oracle(inp,key)[:inp_len]][-1]])
+    return suffix
 
 if __name__ == "__main__":
     key = os.urandom(16)
@@ -97,6 +85,6 @@ if __name__ == "__main__":
     print("Suffix Length: ",suffix_length)
 
     # Break the ECB encryption with random prefix
-    decrypted_data = break_ecb_with_prefix(oracle, key, block_size, prefix_length,suffix_length)
+    decrypted_data = decrypt_hidden_suffix(prefix_length,suffix_length,oracle,key)
     print("Decrypted data:", decrypted_data)
 

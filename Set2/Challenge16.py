@@ -53,9 +53,10 @@ def challenge():
     print("\nEncrypted text blocks with 32 As userinput: ")
     for block in encrypted_blocks:
         print(block)
-    # We change the third block with XOR of 16As and our payload `;admin=true`.
-    # As the 4th block decrypts to 16 As and is XORed with the 3rd block of Cipher text, The resulting plaintext is
-    # user profile with admin=true due to property of XOR
+    # We change the third block with XOR of 16As and our payload `;admin=true` and XOR
+    # the result with the 3rd block of the encrypted text
+    # This results in 4th block in decrypted text as `;admin=true`
+    
     malicious_3rd_block = fixed_xor(userinput[:16],b'B'*5+b";admin=true")
     malicious_3rd_block = fixed_xor(encrypted_blocks[2],malicious_3rd_block)
     print(f"\nMalicious block: {malicious_3rd_block} => {len(malicious_3rd_block)}")
